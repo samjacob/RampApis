@@ -88,25 +88,26 @@
 				$this->response('',406);
 			}
 			
-			$email = $_POST['usern'];		
+			$email = $_POST['username'];		
 			//$pswd = $_POST['pswd'];
 			
 			// Input validations
 			if(!empty($email)){
 				if(filter_var($email, FILTER_VALIDATE_EMAIL)){
-					$sql = mysql_query("SELECT W.WIDGET_NAME,W.WIDGET_TYPE_ID FROM ramp.WIDGET W 
+					$sql = mysql_query("SELECT W.WIDGET_NAME,W.WIDGET_ID, W.WIDGET_TYPE_ID FROM ramp.WIDGET W 
 WHERE W.WIDGET_ID IN(SELECT P.WIDGET_ID FROM ramp.PREFERENCES P WHERE P.USER_ID = (SELECT  U.USER_ID FROM  ramp.RAMP_USERS U WHERE U.EMAIL = '$email' and U.ACT_IND=1) and P.ACT_IND=1)", $this->db);
 					
 					if(mysql_num_rows($sql) > 0){
 						//$dbres = array();
 						$i = 0;
 						while($result = mysql_fetch_array($sql,MYSQL_ASSOC)){
-							$dbres[$i]['wn']=$result['WIDGET_NAME'];
-							$dbres[$i]['wtid']=$result['WIDGET_TYPE_ID'];
+							$dbres[$i]['widgetName']=$result['WIDGET_NAME'];
+							$dbres[$i]['widgetId']=$result['WIDGET_ID'];
+							//$dbres[$i]['widgettypeId']=$result['WIDGET_TYPE_ID'];
 							$typid = $result['WIDGET_TYPE_ID'];
 							$sql1 = mysql_query("SELECT `WIDGET_TYPE_NAME` FROM ramp.WIDGET_MASTER WM WHERE WM.WIDGET_TYPE_ID = $typid");
 							$value = mysql_fetch_array($sql1);
-							$dbres[$i]['wtname'] = $value['WIDGET_TYPE_NAME'];
+							$dbres[$i]['widgetTypeName'] = $value['WIDGET_TYPE_NAME'];
 							$i++;
 						}
 						
@@ -134,29 +135,7 @@ WHERE W.WIDGET_ID IN(SELECT P.WIDGET_ID FROM ramp.PREFERENCES P WHERE P.USER_ID 
 				$this->response('',406);
 			}
 						
-				/*$sql = mysql_query("SELECT `widgetsName`,`widgetsTypeid` FROM `widgets` 
-										WHERE status=1", $this->db);
-					if(mysql_num_rows($sql) > 0){
-						//$dbres = array();
-						$i = 0;
-						while($result = mysql_fetch_array($sql,MYSQL_ASSOC)){
-							$dbres[$i]['wn']=$result['widgetsName'];
-							$dbres[$i]['wtid']=$result['widgetsTypeid'];
-							$typid = $result['widgetsTypeid'];
-							$sql1 = mysql_query("SELECT `widgetstypeName` FROM `widgets_master` WHERE `widgetsTypeid` = $typid");
-							$value = mysql_fetch_array($sql1);
-							$dbres[$i]['wtname'] = $value['widgetstypeName'];
-							$i++;
-						}
-						
-						//$result = array('status' => "Success", "msg" => "valid Email address and Password");
-						$result = $this->json($dbres);
-						// If success everythig is good send header as "OK" and user details
-						$this->response($result, 200);
-					}
-					$res=array('status' => "failed", "msg" => "No data found");
-					$this->response($this->json($res), 400);	// If no records "No Content" status*/
-					$qry = "Select widget_type_id, widget_type_name from WIDGET_MASTER where act_ind=1";
+				$qry = "Select widget_type_id, widget_type_name from WIDGET_MASTER where act_ind=1";
 
 					$exqry = mysql_query($qry);
 					$arr1 =array();
@@ -175,54 +154,94 @@ WHERE W.WIDGET_ID IN(SELECT P.WIDGET_ID FROM ramp.PREFERENCES P WHERE P.USER_ID 
  					$i++; 	
  				} 
  				$resp = $arr1;
- 				//$result = array('status' => "Success", "msg" => "valid Email address and Password");
-				$result = $this->json($resp);
-				// If success everythig is good send header as "OK" and user details
-				$this->response($result, 200);
-			//}
-			//$res=array('status' => "failed", "msg" => "No data found");
-			//$this->response($this->json($res), 400);	// If no records "No Content" status
+ 				$result = $this->json($resp);
+				$this->response($result, 200);			
 		}
 		
-		# SetFavorite API
-		private function setFavorite(){
+		# SetPreference API
+		private function setpreference(){
 			// Cross validation if the request method is POST else it will return "Not Acceptable" status
 			if($this->get_request_method() != "POST"){
 				$this->response('',406);
 			}
 			
-			$email = $_POST['usern'];		
-			$widgetid = $_POST['wid'];
+			$userid = $_POST['userid'];		
+			$widgetid = $_POST['widgetid'];
 			
 			// Input validations
-			if(!empty($email)){
-				if(filter_var($email, FILTER_VALIDATE_EMAIL)){
-					$sql = mysql_query("SELECT `id` FROM `ramp_users` WHERE `email` = '$email' and status=1", $this->db);
-					if(mysql_num_rows($sql) > 0){
-						$value = mysql_fetch_array($sql);
-						$userid = $value['id'];
-						
-						$updsql = "INSERT into preferences (`userid`,`widgetsid`,`status`) values($userid,$widgetid,1)";
+			if(!empty($userid)){
+				if(filter_var($userid, FILTER_VALIDATE_INT)){
+						$checksql ="SELECT pref_id from PREFERENCES where `user_id` = $userid and `widget_id` = $widgetid and act_ind = 1";
+						$checkqry = mysql_query($checksql);
+						if(mysql_num_rows($checkqry)>0){
+							$res=array('status' => "failed", "msg" => "Widget Already set in Preference");
+							$this->response($this->json($res), 400);
+						}else{
+						$updsql = "INSERT into PREFERENCES (`user_id`,`widget_id`,`act_ind`) values($userid,$widgetid,1)";
 						$updqry = mysql_query($updsql, $this->db);
 						if($updqry === true){ 
-						
-						$result = array('status' => "Success", "msg" => "Widget set as favorite");
-						//$result = $this->json($dbres);
-						// If success everythig is good send header as "OK" and user details
-						$this->response($this->json($result), 200);
+							$result = array('status' => "Success", "msg" => "Widget set in preference");
+							// If success everythig is good send header as "OK" and user details
+							$this->response($this->json($result), 200);
 						}
 						else {
-							$res=array('status' => "failed", "msg" => "Not able to set favorite, check the data");
+							$res=array('status' => "failed", "msg" => "Not able to set as preference, check the data");
 							$this->response($this->json($res), 400);
 						}
-					}
-					$res=array('status' => "failed", "msg" => "No data found");
-					$this->response($this->json($res), 400);	// If no records "No Content" status
-				}
+						}
+				 }
+				 // If invalid inputs "Bad Request" status message and reason
+				$error = array('status' => "Failed", "msg" => "Invalid Userid");
+				$this->response($this->json($error), 400);
+									
+			}
+			// If invalid inputs "Bad Request" status message and reason
+			$error = array('status' => "Failed", "msg" => "Please provide a userid");
+			$this->response($this->json($error), 400);
+		}
+		
+		
+		
+		# unsetPreference API
+		private function unsetpreference(){
+			// Cross validation if the request method is POST else it will return "Not Acceptable" status
+			if($this->get_request_method() != "POST"){
+				$this->response('',406);
 			}
 			
+			$userid = $_POST['userid'];		
+			$widgetid = $_POST['widgetid'];
+			
+			// Input validations
+			if(!empty($userid)){
+				if(filter_var($userid, FILTER_VALIDATE_INT)){
+						$checksql ="SELECT pref_id from PREFERENCES where `user_id` = $userid and `widget_id` = $widgetid and act_ind = 1";
+						$checkqry = mysql_query($checksql);
+						if(mysql_num_rows($checkqry)>0){				
+				
+						$updsql = "UPDATE PREFERENCES set act_ind = 0 where `user_id` = $userid and `widget_id` = $widgetid";
+						$updqry = mysql_query($updsql, $this->db);
+						if($updqry === true){ 
+							$result = array('status' => "Success", "msg" => "Widget removed from preferences");
+							// If success everythig is good send header as "OK" and user details
+							$this->response($this->json($result), 200);
+						}
+						else {
+							$res=array('status' => "failed", "msg" => "Not able to unset preference, check the data");
+							$this->response($this->json($res), 400);
+						}
+						} else {
+							$res=array('status' => "failed", "msg" => "Widget Not set in Preference");
+							$this->response($this->json($res), 400);
+						}
+				 }
+				 // If invalid inputs "Bad Request" status message and reason
+				$error = array('status' => "Failed", "msg" => "Invalid Userid");
+				$this->response($this->json($error), 400);
+									
+			}
 			// If invalid inputs "Bad Request" status message and reason
-			$error = array('status' => "Failed", "msg" => "Invalid Preference details");
+			$error = array('status' => "Failed", "msg" => "Please provide a userid");
 			$this->response($this->json($error), 400);
 		}
 		

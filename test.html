@@ -2,34 +2,58 @@
 
 <h2>API 1 : login</h2>
 <form method="POST" action="http://localhost:8085/webvagrant/rampApi/login/">
-Email : <input  type="text" name="username" id="username"/><br />
-Password : <input type="password" name="password" id="password" /><br/><br/>
-<input type="submit" name="submit" value="Login" />
-<br/><br/>
+<table><tr>
+<td>Email : </td><td><input  type="text" name="username" id="username"/><td /></tr>
+<tr><td>Password : </td><td><input type="password" name="password" id="password" /></td></tr><tr>
+<td></td><td><input type="submit" name="submit" value="Login" /></td></tr></table>
 </form>
 
 <hr />
 
 <h2>API 2 : preferences</h2>
 <form method="POST" action="http://localhost:8085/webvagrant/rampApi/preferences/">
-Email : <input  type="text" name="usern" id="usern"/><br /><br />
-
-<input type="submit" name="submit" value="preferences" />
-<br/><br/>
+<table><tr><td>
+Email : </td><td><input  type="text" name="username" id="username"/></td></tr>
+<tr><td></td><td><input type="submit" name="submit" value="Get Preferences" />
+</td></tr></table>
 </form>
 <hr />
 
 <h2>API 3 : widgetlist</h2>
 <form method="GET" action="http://localhost:8085/webvagrant/rampApi/widgetlist/">
-<input type="submit" name="submit" value="widgetList" />
-<br/><br/>
+<table><tr><td></td><td>
+<input type="submit" name="submit" value="widget List" />
+</td></tr/></table>
+</form>
+<hr />
+
+<h2>API 4 : setpreferences</h2>
+<form method="POST" action="http://localhost:8085/webvagrant/rampApi/setpreference/">
+<table><tr><td>
+userid : </td><td><input  type="text" name="userid" id="userid"/></td></tr>
+<tr><td>widgetid : </td><td><input  type="text" name="widgetid" id="widgetid"/></td></tr>
+<tr><td></td><td>
+<input type="submit" name="submit" value="Set Preference" />
+</td></tr></table>
+</form>
+<hr />
+
+<h2>API 5 : unsetpreferences</h2>
+<form method="POST" action="http://localhost:8085/webvagrant/rampApi/unsetpreference/">
+<table><tr><td>
+userid : </td><td><input  type="text" name="userid" id="userid"/></td></tr>
+<tr><td>widgetid : </td><td><input  type="text" name="widgetid" id="widgetid"/></td></tr>
+<tr><td></td><td>
+<input type="submit" name="submit" value="Unset Preference" />
+</td></tr></table>
 </form>
 <hr />
 
 
-<h2>API 4 : users</h2>
+<h2>API 6 : users</h2>
 <form method="GET" action="http://localhost:8085/webvagrant/rampApi/users/">
-<input type="submit" name="submit" value="widgetList" />
-<br/><br/>
+<table><tr><td></td><td>
+<input type="submit" name="submit" value="Users List" />
+</td></tr></table>
 </form>
 <hr />
